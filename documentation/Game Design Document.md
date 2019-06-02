@@ -3,9 +3,13 @@
 ### Game Summary
 
 The user must type the letter of the box that is falling down before it hits the boxes stacked on the bottom. 
-Each box has a type, box types are worth a certain amount of points, letter themselves worth a base amount of points ( like Scrabble ).
-The point of the game is to get a certain score before time runs out to pass the level and move on to the next one.
+Each box has a type, box types are worth a certain amount of points, letter themselves worth a base amount of points 
+( like Scrabble ).The point of the game is to get a certain score before time runs out to pass the level and move on to the next one.
 There is also "bad boxes" that will have a bad effect on the player.
+
+Once a box is on the stack, it now longer has a type. ( it will still have a bad effect it is has one ). if it is 
+touching another box. it will have to be typed all at once from left to right in order to be destroyed. if it is 
+touching multiple boxes at once, then the player has a choice of what box to use in string.   
 
 ### Letter Base Points
 
