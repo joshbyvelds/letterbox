@@ -57,6 +57,12 @@ Bronze: 10
 Sliver: 20
 Gold: 30 
 
+### Good Box Types
+
+x2: doubles the amount of points the box /string is worth
+
+Time: Add some more time to the time bar. 
+
 ### Bad Boxes
 
 Bomb: destroys all boxes in range.
