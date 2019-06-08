@@ -7,9 +7,12 @@ Each box has a type, box types are worth a certain amount of points, letter them
 ( like Scrabble ).The point of the game is to get a certain score before time runs out to pass the level and move on to the next one.
 There is also "bad boxes" that will have a bad effect on the player.
 
-Once a box is on the stack, it now longer has a type. ( it will still have a bad effect it is has one ). if it is 
+Once a box is on the stack, it no longer has a type. ( it will still have a bad effect it is has one ). if it is 
 touching another box. it will have to be typed all at once from left to right in order to be destroyed. if it is 
-touching multiple boxes at once, then the player has a choice of what box to use in string.   
+touching multiple boxes at once, then the player has a choice of what box to use in string. Once a box is select to be
+part of the word string, the next letter must be touching this one. Once a string word is used it will be added to the 
+'used word list'. Any word on the "Used Word List" cannot be used until it has been cleared from the list. The
+'Used Word List's max length is determined by the level.  
 
 ### Letter Base Points
 
