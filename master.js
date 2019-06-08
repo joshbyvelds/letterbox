@@ -51,20 +51,22 @@
         // function to be executed once the scene has been created
         create: function(){
 
-            var xxx = this;
+            var Phaser = this;
             var letterTimeout;
 
             function gameInit() {
                 // setting Matter world bounds
-                xxx.matter.world.setBounds(0, -200, game.config.width, game.config.height + 200);
+                Phaser.matter.world.setBounds(0, -200, game.config.width, game.config.height + 200);
                 generateLetter();
             }
 
             function generateLetter(){
                 let start_pos_x = (Math.random() * (letterGenerateRange[1] + letterGenerateRange[0])) - letterGenerateRange[0];
-                let box = xxx.matter.add.sprite(start_pos_x, -100, "crate");
+                let crate = Phaser.add.sprite(0, 0, "crate");
 
-                //box.add.text
+
+                let letterBox = Phaser.add.container(start_pos_x, -100, [crate]).setSize(64, 64);
+                let LetterPhysics = Phaser.matter.add.gameObject(letterBox);
 
                 let type = null;
                 let type_rand = Math.floor(Math.random() * 100);
@@ -87,11 +89,8 @@
                     type = 7;
                 }
 
-
                 // Use air Friction to control drop speed.
-                box.setFrictionAir(letterAirFriction[type]);
-
-                // IDEA Attach box sprite to a container, then give that container matter.js physics. That way, we can add multiple sprite images to the container.
+                LetterPhysics.setFrictionAir(letterAirFriction[type]);
 
                 letterTimeout = setTimeout(generateLetter, timeBetweenEachLetter);
             }
