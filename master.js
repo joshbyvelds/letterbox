@@ -8,6 +8,34 @@
 
     // Engine Vars, Don't mess with these..
     let game;
+    let letterTypes = {
+        A:{ text:"A", score: 1},
+        B:{ text:"B", score: 3},
+        C:{ text:"C", score: 3},
+        D:{ text:"D", score: 3},
+        E:{ text:"E", score: 1},
+        F:{ text:"F", score: 3},
+        G:{ text:"G", score: 5},
+        H:{ text:"H", score: 5},
+        I:{ text:"I", score: 1},
+        J:{ text:"J", score: 10},
+        K:{ text:"K", score: 7},
+        L:{ text:"L", score: 3},
+        M:{ text:"M", score: 3},
+        N:{ text:"N", score: 3},
+        O:{ text:"O", score: 1},
+        P:{ text:"P", score: 4},
+        Q:{ text:"Q", score: 15},
+        R:{ text:"R", score: 3},
+        S:{ text:"S", score: 2},
+        T:{ text:"T", score: 3},
+        U:{ text:"U", score: 2},
+        V:{ text:"V", score: 20},
+        W:{ text:"W", score: 8},
+        X:{ text:"X", score: 15},
+        Y:{ text:"Y", score: 20},
+        Z:{ text:"Z", score: 10},
+    };
 
     function init(){
         let phaserConfig = {
@@ -45,7 +73,14 @@
         preload: function(){
 
             // loading crate image
-            this.load.image("crate", "crate.png");
+            this.load.image("crate_0", "images/crate.jpg");
+            this.load.image("crate_1", "images/crate_green.jpg");
+            this.load.image("crate_2", "images/crate_blue.jpg");
+            this.load.image("crate_3", "images/crate_red.jpg");
+            this.load.image("crate_4", "images/crate_pink.jpg");
+            this.load.image("crate_5", "images/crate_bronze.jpg");
+            this.load.image("crate_6", "images/crate_silver.jpg");
+            this.load.image("crate_7", "images/crate_gold.jpg");
         },
 
         // function to be executed once the scene has been created
@@ -61,43 +96,68 @@
             }
 
             function generateLetter(){
+                let letter = {};
                 let start_pos_x = (Math.random() * (letterGenerateRange[1] + letterGenerateRange[0])) - letterGenerateRange[0];
-                let crate = Phaser.add.sprite(0, 0, "crate");
 
-
-                let letterBox = Phaser.add.container(start_pos_x, -100, [crate]).setSize(64, 64);
-                let LetterPhysics = Phaser.matter.add.gameObject(letterBox);
-
-                let type = null;
+                // Get the boxes basic type..
                 let type_rand = Math.floor(Math.random() * 100);
+                let crate_type;
 
                 if(type_rand < 40){
-                    type = 0;
+                    letter.type = 0;
                 }else if(type_rand < 65){
-                    type = 1;
+                    letter.type = 1;
                 }else if(type_rand < 80){
-                    type = 2;
+                    letter.type = 2;
                 }else if(type_rand < 90){
-                    type = 3;
+                    letter.type = 3;
                 }else if(type_rand < 94){
-                    type = 4;
+                    letter.type = 4;
                 }else if(type_rand < 97){
-                    type = 5;
+                    letter.type = 5;
                 }else if(type_rand < 99){
-                    type = 6;
+                    letter.type = 6;
                 }else{
-                    type = 7;
+                    letter.type = 7;
                 }
 
+
+
+                // check to see if's a good/bad type box
+
+
+                // get the boxes' actual letter
+                letter.letter = randomProperty(letterTypes, true);
+
+
+                let crate = Phaser.add.sprite(0, 0, "crate_" + letter.type);
+                let letterText = Phaser.add.text(0, 0, letterTypes[letter.letter].text, { fontFamily: '"Roboto Condensed"', fontSize: "50px", align:"center"}).setOrigin(0.5);
+                letterText.setShadow(2, 2, 'rgba(0,0,0,0.7)', 2);
+
+                let letterBox = Phaser.add.container(start_pos_x, -100, [crate,letterText]).setSize(64, 64);
+                let LetterPhysics = Phaser.matter.add.gameObject(letterBox);
+
                 // Use air Friction to control drop speed.
-                LetterPhysics.setFrictionAir(letterAirFriction[type]);
+                LetterPhysics.setFrictionAir(letterAirFriction[letter.type]);
 
                 letterTimeout = setTimeout(generateLetter, timeBetweenEachLetter);
             }
 
-             //gameInit();
+             gameInit();
         }
     });
 
     window.onload = init();
 }());
+
+
+//Utility functions..
+var randomProperty = function (obj, exportkey) {
+    var keys = Object.keys(obj);
+    var key = keys[ keys.length * Math.random() << 0];
+    if(exportkey){
+        return key;
+    }else{
+        return obj[key];
+    }
+};

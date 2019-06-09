@@ -47,11 +47,11 @@ Z: 10
 
 From slowest to fastest:
 
-Green: 1
-Red: 2
+Normal: 1
+Green: 2
 Blue: 3
-Pink: 4
-Yellow: 5
+Red: 4
+Pink: 5
 
 Bronze: 10
 Sliver: 20
