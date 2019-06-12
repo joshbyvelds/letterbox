@@ -108,6 +108,7 @@
 
                 // setup platform for boxes to land on
 
+                generateLetter();
                 tick();
             }
 
