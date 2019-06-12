@@ -2,40 +2,45 @@
 
     // Game Settings.
     let gravity = 1,
-        letterGenerateRange = [50, 1350];
-        letterAirFriction = [0.25, 0.20, 0.15, 0.10, 0.075, 0.030, 0.020, 0.00];
-        timeBetweenEachLetter = 1000;
+        letterGenerateRange = [50, 1350],
+        letterAirFriction = [0.25, 0.20, 0.15, 0.10, 0.075, 0.030, 0.020, 0.00],
+        timeBetweenEachLetter = 1000,
+        boxTypeScores = [1,5,20,30,60,100,200,500];
+        letterTypes = {
+            A:{ text:"A", score: 1},
+            B:{ text:"B", score: 3},
+            C:{ text:"C", score: 3},
+            D:{ text:"D", score: 3},
+            E:{ text:"E", score: 1},
+            F:{ text:"F", score: 3},
+            G:{ text:"G", score: 5},
+            H:{ text:"H", score: 5},
+            I:{ text:"I", score: 1},
+            J:{ text:"J", score: 10},
+            K:{ text:"K", score: 7},
+            L:{ text:"L", score: 3},
+            M:{ text:"M", score: 3},
+            N:{ text:"N", score: 3},
+            O:{ text:"O", score: 1},
+            P:{ text:"P", score: 4},
+            Q:{ text:"Q", score: 15},
+            R:{ text:"R", score: 3},
+            S:{ text:"S", score: 2},
+            T:{ text:"T", score: 3},
+            U:{ text:"U", score: 2},
+            V:{ text:"V", score: 20},
+            W:{ text:"W", score: 8},
+            X:{ text:"X", score: 15},
+            Y:{ text:"Y", score: 20},
+            Z:{ text:"Z", score: 10},
+        };
 
     // Engine Vars, Don't mess with these..
     let game;
-    let letterTypes = {
-        A:{ text:"A", score: 1},
-        B:{ text:"B", score: 3},
-        C:{ text:"C", score: 3},
-        D:{ text:"D", score: 3},
-        E:{ text:"E", score: 1},
-        F:{ text:"F", score: 3},
-        G:{ text:"G", score: 5},
-        H:{ text:"H", score: 5},
-        I:{ text:"I", score: 1},
-        J:{ text:"J", score: 10},
-        K:{ text:"K", score: 7},
-        L:{ text:"L", score: 3},
-        M:{ text:"M", score: 3},
-        N:{ text:"N", score: 3},
-        O:{ text:"O", score: 1},
-        P:{ text:"P", score: 4},
-        Q:{ text:"Q", score: 15},
-        R:{ text:"R", score: 3},
-        S:{ text:"S", score: 2},
-        T:{ text:"T", score: 3},
-        U:{ text:"U", score: 2},
-        V:{ text:"V", score: 20},
-        W:{ text:"W", score: 8},
-        X:{ text:"X", score: 15},
-        Y:{ text:"Y", score: 20},
-        Z:{ text:"Z", score: 10},
-    };
+    let score;
+    let timeLeft;
+    let letterTimeout;
+    let fallingLetters;
 
     function init(){
         let phaserConfig = {
@@ -52,8 +57,13 @@
                 matter: {
                     gravity: {
                         y: gravity
-                    }
+                    },
+                    debug: false
                 }
+            },
+            parent: "main",
+            dom: {
+                createContainer: true
             },
             scene: playGame
         };
@@ -86,13 +96,47 @@
         // function to be executed once the scene has been created
         create: function(){
 
-            var Phaser = this;
-            var letterTimeout;
+            let Phaser = this;
+            let ground;
 
             function gameInit() {
-                // setting Matter world bounds
+                fallingLetters = [];
+                setupUI();
+                setupEvents();
+                // Setting Matter.js physics world bounds
                 Phaser.matter.world.setBounds(0, -200, game.config.width, game.config.height + 200);
-                generateLetter();
+
+                // setup platform for boxes to land on
+
+                tick();
+            }
+
+            function tick() {
+                updateUI();
+                if(timeLeft === 0){
+                    gameOver();
+                }
+
+                timeLeft--;
+                setTimeout(tick, 1000);
+            }
+
+            function updateUI() {
+                document.getElementById("ui_score").innerHTML = score;
+                document.getElementById("ui_time").innerHTML = timeLeft;
+            }
+
+            function gameOver() {
+                alert("Game Over");
+            }
+
+            function setupUI() {
+                score = 0;
+                timeLeft = 120;
+            }
+
+            function setupEvents() {
+                Phaser.input.keyboard.on('keydown', function(event){checkLetter(event)});
             }
 
             function generateLetter(){
@@ -121,8 +165,6 @@
                     letter.type = 7;
                 }
 
-
-
                 // check to see if's a good/bad type box
 
 
@@ -134,13 +176,40 @@
                 let letterText = Phaser.add.text(0, 0, letterTypes[letter.letter].text, { fontFamily: '"Roboto Condensed"', fontSize: "50px", align:"center"}).setOrigin(0.5);
                 letterText.setShadow(2, 2, 'rgba(0,0,0,0.7)', 2);
 
-                let letterBox = Phaser.add.container(start_pos_x, -100, [crate,letterText]).setSize(64, 64);
-                let LetterPhysics = Phaser.matter.add.gameObject(letterBox);
+                letter.sprite = Phaser.add.container(start_pos_x, -100, [crate,letterText]).setSize(64, 64);
+                letter.physics = Phaser.matter.add.gameObject(letter.sprite);
 
-                // Use air Friction to control drop speed.
-                LetterPhysics.setFrictionAir(letterAirFriction[letter.type]);
+                fallingLetters.push(letter);
 
+                //console.log(fallingLetters);
+
+                // Use air Friction to control drop speed..
+                letter.physics.setFrictionAir(letterAirFriction[letter.type]);
+
+                // Create next letter after one second..
                 letterTimeout = setTimeout(generateLetter, timeBetweenEachLetter);
+            }
+
+            function checkLetter(event){
+                var letter;
+                var i;
+                // look in falling letters list for letter that matches key
+                for (i = 0; i < fallingLetters.length; i++) {
+                    letter = fallingLetters[i];
+
+                    console.log(event.key + "|" +  letter.letter);
+
+                    if(letter.letter === event.key.toUpperCase()){
+                        letter.physics.destroy();
+                        letter.sprite.destroy();
+                        break;
+                    }
+                }
+
+                letter.physics.destroy();
+                score += boxTypeScores[letter.type];
+                fallingLetters.splice(i, 1);
+                updateUI();
             }
 
              gameInit();

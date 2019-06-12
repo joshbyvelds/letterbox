@@ -14,6 +14,26 @@ part of the word string, the next letter must be touching this one. Once a strin
 'used word list'. Any word on the "Used Word List" cannot be used until it has been cleared from the list. The
 'Used Word List's max length is determined by the level.  
 
+### Box Types
+
+From slowest to fastest:
+
+Normal: 1 | 1 pts
+
+Green: 2 | 5 pts
+
+Blue: 3 | 20 pts
+
+Red: 4 | 30 pts
+
+Pink: 5 | 60 pts
+
+Bronze: 10 | 100 pts
+
+Sliver: 20 | 200 pts
+
+Gold: 30  | 500 pts
+
 ### Letter Base Points
 
 A: 1
@@ -42,20 +62,6 @@ W: 8
 X: 15
 Y: 20
 Z: 10
-
-### Box Types
-
-From slowest to fastest:
-
-Normal: 1
-Green: 2
-Blue: 3
-Red: 4
-Pink: 5
-
-Bronze: 10
-Sliver: 20
-Gold: 30 
 
 ### Good Box Types
 
