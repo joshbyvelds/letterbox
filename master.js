@@ -40,7 +40,7 @@
     let score;
     let timeLeft;
     let letterTimeout;
-    let fallingLetters;
+    let boxes;
 
     function init(){
         let phaserConfig = {
@@ -100,15 +100,17 @@
             let ground;
 
             function gameInit() {
-                fallingLetters = [];
+                boxes = [];
                 setupUI();
                 setupEvents();
                 // Setting Matter.js physics world bounds
                 Phaser.matter.world.setBounds(0, -200, game.config.width, game.config.height + 200);
 
                 // setup platform for boxes to land on
+                Phaser.matter.add.rectangle(game.config.width / 2, game.config.height, game.config.width, 2, { label:"floor", isStatic: true, ignoreGravity: true });
 
                 generateLetter();
+                setTimeout(generateLetter, 3000);
                 tick();
             }
 
@@ -138,82 +140,176 @@
 
             function setupEvents() {
                 Phaser.input.keyboard.on('keydown', function(event){checkLetter(event)});
+                Phaser.matter.world.on('collisionstart', function (event, bodyA, bodyB) {checkCollision(event,bodyA,bodyB);});
+                Phaser.matter.world.on('collisionend', function (event, bodyA, bodyB) {checkCollisionEnd(event,bodyA,bodyB);});
             }
 
+            var test = 0;
+
             function generateLetter(){
-                let letter = {};
+                let type;
+                let letter;
                 let start_pos_x = (Math.random() * (letterGenerateRange[1] + letterGenerateRange[0])) - letterGenerateRange[0];
+
+                if(test === 0){
+                    start_pos_x = 100;
+                }
+
+                if(test === 1){
+                    start_pos_x = 160;
+                }
 
                 // Get the boxes basic type..
                 let type_rand = Math.floor(Math.random() * 100);
                 let crate_type;
 
                 if(type_rand < 40){
-                    letter.type = 0;
+                    type = 0;
                 }else if(type_rand < 65){
-                    letter.type = 1;
+                    type = 1;
                 }else if(type_rand < 80){
-                    letter.type = 2;
+                    type = 2;
                 }else if(type_rand < 90){
-                    letter.type = 3;
+                    type = 3;
                 }else if(type_rand < 94){
-                    letter.type = 4;
+                    type = 4;
                 }else if(type_rand < 97){
-                    letter.type = 5;
+                    type = 5;
                 }else if(type_rand < 99){
-                    letter.type = 6;
+                    type = 6;
                 }else{
-                    letter.type = 7;
+                    type = 7;
+                }
+
+                if(test === 0){
+                    type = 0;
+                }
+
+                if(test === 1){
+                    type = 2;
                 }
 
                 // check to see if's a good/bad type box
 
 
                 // get the boxes' actual letter
-                letter.letter = randomProperty(letterTypes, true);
+                letter = randomProperty(letterTypes, true);
 
 
-                let crate = Phaser.add.sprite(0, 0, "crate_" + letter.type);
-                let letterText = Phaser.add.text(0, 0, letterTypes[letter.letter].text, { fontFamily: '"Roboto Condensed"', fontSize: "50px", align:"center"}).setOrigin(0.5);
+                let crate = Phaser.add.sprite(0, 0, "crate_" + type);
+                crate.name = "box_type_image";
+                let letterText = Phaser.add.text(0, 0, letterTypes[letter].text, { fontFamily: '"Roboto Condensed"', fontSize: "50px", align:"center"}).setOrigin(0.5);
                 letterText.setShadow(2, 2, 'rgba(0,0,0,0.7)', 2);
 
-                letter.sprite = Phaser.add.container(start_pos_x, -100, [crate,letterText]).setSize(64, 64);
-                letter.physics = Phaser.matter.add.gameObject(letter.sprite);
-
-                fallingLetters.push(letter);
-
-                //console.log(fallingLetters);
+                let sprite = Phaser.add.container(start_pos_x, -64, [crate,letterText]).setSize(64, 64);
+                let letterBody = Phaser.matter.add.gameObject(sprite, {label: "Box", collidingWith:[]});
 
                 // Use air Friction to control drop speed..
-                letter.physics.setFrictionAir(letterAirFriction[letter.type]);
+                letterBody.setFrictionAir(letterAirFriction[type]);
+
+                letterBody.isFalling = true;
+                letterBody.type = type;
+                letterBody.letter = letter;
+                boxes.push(letterBody);
+
+                test++;
+
+                //console.log(letterBody);
 
                 // Create next letter after one second..
-                letterTimeout = setTimeout(generateLetter, timeBetweenEachLetter);
+                //letterTimeout = setTimeout(generateLetter, timeBetweenEachLetter);
             }
 
             function checkLetter(event){
-                var letter;
+                var box;
                 var i;
                 // look in falling letters list for letter that matches key
-                for (i = 0; i < fallingLetters.length; i++) {
-                    letter = fallingLetters[i];
+                for (i = 0; i < boxes.length; i++) {
+                    box = boxes[i];
 
-                    console.log(event.key + "|" +  letter.letter);
+                    //console.log(event.key + "|" +  letter.letter);
 
-                    if(letter.letter === event.key.toUpperCase()){
-                        letter.physics.destroy();
-                        letter.sprite.destroy();
+                    if(box.letter === event.key.toUpperCase() && box.isFalling){
+                        console.log(box);
+                        score += boxTypeScores[box.type];
+                        boxes.splice(i, 1);
+                        box.destroy();
+                        updateUI();
                         break;
                     }
+
                 }
 
-                letter.physics.destroy();
-                score += boxTypeScores[letter.type];
-                fallingLetters.splice(i, 1);
-                updateUI();
+                // then look for boxes on ground or in stack..
             }
 
-             gameInit();
+            function checkCollision(event, bodyA, bodyB) {
+
+                // ** NOTE: All body collisions will be recorded here ** //
+
+                // NOTE: All checks must have a return..
+
+                 //console.log(bodyA);
+                 //console.log(bodyB);
+
+                let box;
+
+                // First lets check if a falling block hits the floor..
+                if(bodyA.label === "floor" || bodyB.label === "floor") {
+                    box = (bodyA.label === "floor") ? bodyB : bodyA;
+                    //console.log(box);
+                    box.gameObject.isFalling = false;
+                    box.gameObject.getByName("box_type_image").setTexture('crate_0');
+                    box.type = 0;
+                    return;
+                }
+
+                // Second, lets check if a box has hit another box
+                if(bodyA.label === "Box" && bodyB.label === "Box") {
+                    bodyA.collidingWith.push(bodyB);
+                    bodyB.collidingWith.push(bodyA);
+                    console.log("On");
+
+                    console.log("BodyA");
+                    console.log(bodyA.collidingWith.slice(0));
+
+                    console.log("BodyB");
+                    console.log(bodyB.collidingWith.slice(0));
+
+                    if (!bodyA.gameObject.isFalling || !bodyB.gameObject.isFalling) {
+                        bodyA.gameObject.isFalling = false;
+                        bodyB.gameObject.isFalling = false;
+                        bodyA.gameObject.getByName("box_type_image").setTexture('crate_0');
+                        bodyB.gameObject.getByName("box_type_image").setTexture('crate_0');
+                        return;
+                    }
+                }
+            }
+
+            function checkCollisionEnd(event, bodyA, bodyB) {
+                if(bodyA.label === "Box" && bodyB.label === "Box") {
+                    bodyA.collidingWith = bodyA.collidingWith.filter(e => e !== bodyB);
+                    bodyB.collidingWith = bodyB.collidingWith.filter(e => e !== bodyA);
+
+                    console.log("Off");
+
+                    console.log("BodyA");
+                    console.log(bodyA.collidingWith.slice(0));
+
+                    console.log("BodyB");
+                    console.log(bodyB.collidingWith.slice(0));
+
+                    if (!bodyA.gameObject.isFalling || !bodyB.gameObject.isFalling) {
+                        bodyA.gameObject.isFalling = false;
+                        bodyB.gameObject.isFalling = false;
+                        bodyA.gameObject.getByName("box_type_image").setTexture('crate_0');
+                        bodyB.gameObject.getByName("box_type_image").setTexture('crate_0');
+                        return;
+                    }
+                }
+            }
+
+            gameInit();
         }
     });
 
