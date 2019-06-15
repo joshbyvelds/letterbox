@@ -298,14 +298,6 @@
                     //
                     // console.log("BodyB");
                     // console.log(bodyB.collidingWith.slice(0));
-
-                    if (!bodyA.gameObject.isFalling || !bodyB.gameObject.isFalling) {
-                        bodyA.gameObject.isFalling = false;
-                        bodyB.gameObject.isFalling = false;
-                        bodyA.gameObject.getByName("box_type_image").setTexture('crate_0');
-                        bodyB.gameObject.getByName("box_type_image").setTexture('crate_0');
-                        return;
-                    }
                 }
             }
 
