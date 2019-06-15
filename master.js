@@ -110,7 +110,6 @@
                 Phaser.matter.add.rectangle(game.config.width / 2, game.config.height, game.config.width, 2, { label:"floor", isStatic: true, ignoreGravity: true });
 
                 generateLetter();
-                setTimeout(generateLetter, 3000);
                 tick();
             }
 
@@ -144,20 +143,20 @@
                 Phaser.matter.world.on('collisionend', function (event, bodyA, bodyB) {checkCollisionEnd(event,bodyA,bodyB);});
             }
 
-            var test = 0;
+            //var test = 0;
 
             function generateLetter(){
                 let type;
                 let letter;
                 let start_pos_x = (Math.random() * (letterGenerateRange[1] + letterGenerateRange[0])) - letterGenerateRange[0];
 
-                if(test === 0){
-                    start_pos_x = 100;
-                }
-
-                if(test === 1){
-                    start_pos_x = 160;
-                }
+                // if(test === 0){
+                //     start_pos_x = 100;
+                // }
+                //
+                // if(test === 1){
+                //     start_pos_x = 160;
+                // }
 
                 // Get the boxes basic type..
                 let type_rand = Math.floor(Math.random() * 100);
@@ -181,13 +180,13 @@
                     type = 7;
                 }
 
-                if(test === 0){
-                    type = 0;
-                }
-
-                if(test === 1){
-                    type = 2;
-                }
+                // if(test === 0){
+                //     type = 0;
+                // }
+                //
+                // if(test === 1){
+                //     type = 2;
+                // }
 
                 // check to see if's a good/bad type box
 
@@ -212,12 +211,12 @@
                 letterBody.letter = letter;
                 boxes.push(letterBody);
 
-                test++;
+                // test++;
 
                 //console.log(letterBody);
 
                 // Create next letter after one second..
-                //letterTimeout = setTimeout(generateLetter, timeBetweenEachLetter);
+                letterTimeout = setTimeout(generateLetter, timeBetweenEachLetter);
             }
 
             function checkLetter(event){
@@ -230,7 +229,7 @@
                     //console.log(event.key + "|" +  letter.letter);
 
                     if(box.letter === event.key.toUpperCase() && box.isFalling){
-                        console.log(box);
+                        // console.log(box);
                         score += boxTypeScores[box.type];
                         boxes.splice(i, 1);
                         box.destroy();
@@ -268,13 +267,13 @@
                 if(bodyA.label === "Box" && bodyB.label === "Box") {
                     bodyA.collidingWith.push(bodyB);
                     bodyB.collidingWith.push(bodyA);
-                    console.log("On");
-
-                    console.log("BodyA");
-                    console.log(bodyA.collidingWith.slice(0));
-
-                    console.log("BodyB");
-                    console.log(bodyB.collidingWith.slice(0));
+                    // console.log("On");
+                    //
+                    // console.log("BodyA");
+                    // console.log(bodyA.collidingWith.slice(0));
+                    //
+                    // console.log("BodyB");
+                    // console.log(bodyB.collidingWith.slice(0));
 
                     if (!bodyA.gameObject.isFalling || !bodyB.gameObject.isFalling) {
                         bodyA.gameObject.isFalling = false;
@@ -291,13 +290,14 @@
                     bodyA.collidingWith = bodyA.collidingWith.filter(e => e !== bodyB);
                     bodyB.collidingWith = bodyB.collidingWith.filter(e => e !== bodyA);
 
-                    console.log("Off");
-
-                    console.log("BodyA");
-                    console.log(bodyA.collidingWith.slice(0));
-
-                    console.log("BodyB");
-                    console.log(bodyB.collidingWith.slice(0));
+                    //
+                    // console.log("Off");
+                    //
+                    // console.log("BodyA");
+                    // console.log(bodyA.collidingWith.slice(0));
+                    //
+                    // console.log("BodyB");
+                    // console.log(bodyB.collidingWith.slice(0));
 
                     if (!bodyA.gameObject.isFalling || !bodyB.gameObject.isFalling) {
                         bodyA.gameObject.isFalling = false;
