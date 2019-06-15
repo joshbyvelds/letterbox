@@ -41,6 +41,8 @@
     let timeLeft;
     let letterTimeout;
     let boxes;
+    let selectedWordBoxes;
+    let word;
 
     function init(){
         let phaserConfig = {
@@ -100,7 +102,7 @@
             let ground;
 
             function gameInit() {
-                boxes = [];
+                resetVariables();
                 setupUI();
                 setupEvents();
                 // Setting Matter.js physics world bounds
@@ -111,6 +113,12 @@
 
                 generateLetter();
                 tick();
+            }
+
+            function resetVariables(){
+                boxes = [];
+                selectedWordBoxes = [];
+                word = "";
             }
 
             function tick() {
@@ -198,6 +206,7 @@
                 let crate = Phaser.add.sprite(0, 0, "crate_" + type);
                 crate.name = "box_type_image";
                 let letterText = Phaser.add.text(0, 0, letterTypes[letter].text, { fontFamily: '"Roboto Condensed"', fontSize: "50px", align:"center"}).setOrigin(0.5);
+                letterText.name = "letter_text";
                 letterText.setShadow(2, 2, 'rgba(0,0,0,0.7)', 2);
 
                 let sprite = Phaser.add.container(start_pos_x, -64, [crate,letterText]).setSize(64, 64);
@@ -222,21 +231,42 @@
             function checkLetter(event){
                 var box;
                 var i;
+
+                // if user press the clear word key
+                if(event.code === "Space"){
+                    word = "";
+                    selectedWordBoxes.forEach(function(element){
+                        element.getByName("letter_text").setStroke();
+                    });
+                    selectedWordBoxes = [];
+                    return;
+                }
+
                 // look in falling letters list for letter that matches key
                 for (i = 0; i < boxes.length; i++) {
                     box = boxes[i];
 
-                    //console.log(event.key + "|" +  letter.letter);
-
-                    if(box.letter === event.key.toUpperCase() && box.isFalling){
-                        // console.log(box);
-                        score += boxTypeScores[box.type];
-                        boxes.splice(i, 1);
-                        box.destroy();
-                        updateUI();
-                        break;
+                    if(box.letter === event.key.toUpperCase()){
+                        if(box.isFalling) {
+                            score += boxTypeScores[box.type];
+                            boxes.splice(i, 1);
+                            box.destroy();
+                            updateUI();
+                            break;
+                        } else {
+                            if(!selectedWordBoxes.includes(box)){
+                                if(selectedWordBoxes.length >= 1){
+                                    console.log("Test 2");
+                                    if(!box.body.collidingWith.includes(selectedWordBoxes[selectedWordBoxes.length - 1].body))
+                                        break;
+                                }
+                                box.getByName("letter_text").setStroke('rgba(0,0,0,1)', 6);
+                                word += box.letter;
+                                selectedWordBoxes.push(box);
+                                break;
+                            }
+                        }
                     }
-
                 }
 
                 // then look for boxes on ground or in stack..
@@ -280,6 +310,18 @@
                         bodyB.gameObject.isFalling = false;
                         bodyA.gameObject.getByName("box_type_image").setTexture('crate_0');
                         bodyB.gameObject.getByName("box_type_image").setTexture('crate_0');
+
+                        bodyA.collidingWith.forEach(function(element){
+                            element.gameObject.isFalling = false;
+                            element.gameObject.getByName("box_type_image").setTexture('crate_0');
+                        });
+
+                        bodyB.collidingWith.forEach(function(element){
+                            element.gameObject.isFalling = false;
+                            element.gameObject.getByName("box_type_image").setTexture('crate_0');
+                        });
+
+
                         return;
                     }
                 }
